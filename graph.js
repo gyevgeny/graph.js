@@ -16,7 +16,8 @@ EasyGraph = {
 		StrongConnectedComponents: null,
 		Dijkstra: null,
 		TopologicalSort: null, //Directed Acyclic Graph
-        SPFA: null
+        SPFA: null,
+        EulerPath: null
 	}
 }
 
@@ -29,6 +30,17 @@ EasyGraph.Array.indexOf = function( obj, v, start ){
  }else
  	return obj.indexOf(v, start || 0);
 }
+
+EasyGraph.Object.size = function( obj ){
+	if(!Object.prototype.keys){
+    	var size = 0, key;
+    	for (key in obj)
+        	if (obj.hasOwnProperty(key)) size++;    	
+    	return size;
+	} else
+		return Object.keys( obj ).length;
+}
+
 
 EasyGraph.isArray = function(value){
 	return Object.prototype.toString.call(value) === '[object Array]';	
@@ -590,7 +602,7 @@ EasyGraph.Algorithms.StrongConnectedComponents.prototype.run = function(){
 			var component = [];
 			if( visitedVertices.hasOwnProperty( order[i])) {continue;}
 
-			tg.visit( order[i], function(visitedvertices, iterationVertex, node){
+			tg.visit( order[i], function(vv, iterationVertex, node){
 				visitedVertices[iterationVertex] = true;
 				component.push(iterationVertex);
 
@@ -708,3 +720,65 @@ EasyGraph.Algorithms.SPFA.prototype.distances = function(fromV) {
 	return data.dist;
 }
 
+EasyGraph.Algorithms.EulerPath = function( graph ){
+	this.graph = graph;
+}
+
+EasyGraph.Algorithms.EulerPath.prototype.run = function(){
+
+
+
+}
+
+EasyGraph.Algorithms.EulerPath.prototype.startPoints = function(){
+	var rank = {};
+
+	for(var i = 0 ; i < this.graph.vertices.length ; i++)
+		rank[this.graph.vertices[i]] = 0;
+
+	for(i = 0; i < this.graph.vertices.length ; i++){
+		var v = this.graph.vertices[i];
+		var node = this.graph.node(v);
+
+		if(this.graph.directed){
+			rank[v] += EasyGraph.Object.size(node);
+			for( vv in node)
+				rank[vv] -= 1;
+		}else
+			rank[v] = EasyGraph.Object.size(node) % 2;
+	}
+
+	var start, finish;
+	for( v in rank ){
+		if(rank[v] != 1 && rank[v] != 0 && rank[v] != -1)
+			return undefined;
+
+		if(rank[v] == 1){
+			if( start === undefined)
+				start = v;
+			else 
+				if ( finish === undefined )
+					finish = v;
+				else
+					return undefined
+		}
+
+		if(rank[v] == -1){
+			if ( finish === undefined )
+				finish = v;
+			else
+				return undefined;
+		}
+	}
+
+	if( start === undefined ){
+		start = this.graph.vertices[0]; 
+		finish = start;
+	}
+
+	return {
+		start : start,
+		finish : finish
+	}
+
+} 
