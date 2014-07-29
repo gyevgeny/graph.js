@@ -280,6 +280,26 @@ EasyGraph.Test.test_spfa_negative_cicle = function(){
 	this.assert_equal(path, [1,2,3], "Incorrect path");
 }
 
+EasyGraph.Test.test_euler_path_1 = function(){
+	var g = new EasyGraph.Graph
+	g.import([[1,2],[1,4],[1,5],[2,3],[2,4],[2,5],[4,3],[4,5]])	
+
+	a = new EasyGraph.Algorithms.EulerPath(g);
+	var path = a.run();
+
+	this.assert_equal(path, ["5", "4", "2", "5", "1", "4", "3", "2", "1"] , "Incorrect path");
+}
+
+EasyGraph.Test.test_euler_path_2 = function(){
+	var g = new EasyGraph.Graph
+	g.import([[1,2],[1,4],[1,5],[2,3],[2,4],[2,5],[4,3],[4,5],[7]])	
+
+	a = new EasyGraph.Algorithms.EulerPath(g);
+	var path = a.run();
+
+	this.assert_equal(path, undefined , "Incorrect path");
+}
+
 EasyGraph.Test.run = function(){
 
 	this.test_incrementor = 1;

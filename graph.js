@@ -31,6 +31,7 @@ EasyGraph.Array.indexOf = function( obj, v, start ){
  	return obj.indexOf(v, start || 0);
 }
 
+EasyGraph.Object = {};
 EasyGraph.Object.size = function( obj ){
 	if(!Object.prototype.keys){
     	var size = 0, key;
@@ -725,9 +726,36 @@ EasyGraph.Algorithms.EulerPath = function( graph ){
 }
 
 EasyGraph.Algorithms.EulerPath.prototype.run = function(){
+	var self = this;
 
+	var list = this.graph.separate();
+	if( list.length > 1 )
+		return undefined;
 
+	var points = this.startPoints();
+	if(points == undefined) return undefined;
 
+	visited = new EasyGraph.Graph;
+	visited.directed = this.graph.directed;
+
+	visited.import( this.graph.vertices.map(function(v){return [v]}) );
+	path = []
+
+	var dfs = function( v, parentV ){
+
+		if (parentV != undefined)
+			visited.connect( v, parentV );
+
+		for(var iterationVertex in self.graph.node(v))
+			if( visited.node(v)[iterationVertex] === undefined )
+    			dfs(iterationVertex, v);    	
+    	
+		path.push(v);
+	}
+
+	dfs(points.start);
+
+	return path;
 }
 
 EasyGraph.Algorithms.EulerPath.prototype.startPoints = function(){
