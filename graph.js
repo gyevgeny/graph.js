@@ -71,27 +71,43 @@ EasyGraph.GraphInspector.topological = function( graph, rootVertex, f ){
 
 EasyGraph.GraphInspector.dfs = function( graph, rootVertex, f, visitedVertices ){
 	var visitedVertices = visitedVertices || {};
-	var queueVertices = {};
-	queueVertices[rootVertex] = true;
-	var lifo = [ rootVertex ];
 
-	while( lifo.length > 0 ){
+	if (typeof f == "function"){
 
-		iterationVertex = lifo.pop();
-		node = graph.node(iterationVertex);
+		var queueVertices = {};
+		queueVertices[rootVertex] = true;
+		var lifo = [ rootVertex ];
 
-		visitedVertices[iterationVertex] = true;
+		while( lifo.length > 0 ){
 
-		if(f.call( graph, visitedVertices, iterationVertex, node))
-		{
-			for(var v in node)
-				if (!queueVertices.hasOwnProperty(v))
-					if(!visitedVertices.hasOwnProperty(v)){
-						queueVertices[v] = true;
-						lifo.push( v );		
-					}		
+			iterationVertex = lifo.pop();
+			node = graph.node(iterationVertex);
 
-		}else{ return; }
+			visitedVertices[iterationVertex] = true;
+
+			if(f.call( graph, visitedVertices, iterationVertex, node)){
+				for(var v in node)
+					if (!queueVertices.hasOwnProperty(v))
+						if(!visitedVertices.hasOwnProperty(v)){
+							queueVertices[v] = true;
+							lifo.push( v );		
+						}		
+
+			}else{ return; }
+		}
+	} else {
+		var dfs2 = function( v, parentV ){
+
+			f.enter.call( graph, v, parentV);
+
+			for(var iterationVertex in graph.node(v))
+				if( f.possible.call(graph, v, iterationVertex) )
+    				dfs2(iterationVertex, v);    	
+    	
+    		f.exit.call( graph, v, parentV);
+		}
+
+		dfs2( rootVertex );
 	}
 };
 
@@ -741,19 +757,17 @@ EasyGraph.Algorithms.EulerPath.prototype.run = function(){
 	visited.import( this.graph.vertices.map(function(v){return [v]}) );
 	path = []
 
-	var dfs = function( v, parentV ){
-
-		if (parentV != undefined)
-			visited.connect( v, parentV );
-
-		for(var iterationVertex in self.graph.node(v))
-			if( visited.node(v)[iterationVertex] === undefined )
-    			dfs(iterationVertex, v);    	
-    	
-		path.push(v);
-	}
-
-	dfs(points.start);
+	this.graph.visit( points.start, {
+		enter : function(v, parentV) {
+			if (parentV != undefined) visited.connect( v, parentV ); 
+		},
+		possible : function(v, iterationVertex){
+			return visited.node(v)[iterationVertex] === undefined;
+		},
+		exit : function(v, parentV){
+			path.push(v);
+		}
+	}, "dfs");
 
 	return path;
 }
