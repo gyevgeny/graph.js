@@ -300,6 +300,51 @@ EasyGraph.Test.test_euler_path_2 = function(){
 	this.assert_equal(path, undefined , "Incorrect path");
 }
 
+//http://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Minimum_spanning_tree.svg/450px-Minimum_spanning_tree.svg.png
+EasyGraph.Test.test_spanning_tree = function(){
+	var g = new EasyGraph.Graph
+	g.import([
+		[1,2,9],
+		[1,3,9],
+		[1,4,8],
+		[1,9,18],
+		[2,3,3],
+		[2,6,6],
+		[3,4,9],
+		[3,5,4],
+		[3,6,4],
+		[4,5,8],
+		[4,7,7],
+		[4,10,9],
+		[4,9,10],
+		[5,6,2],
+		[5,7,9],
+		[6,7,9],
+		[7,8,4],
+		[7,10,5],
+		[8,10,1],
+		[8,9,4],
+		[9,10,3]])	
+
+	a = new EasyGraph.Algorithms.MSP(g)
+	var g2 = a.run();
+
+	this.assert_equal( 10, g2.vertices.length )
+	this.assert_equal( 8, g2.weight(1,4) )
+	this.assert_equal( 2, g2.weight(5,6) )
+	this.assert_equal( 3, g2.weight(10,9) )
+	this.assert_equal( 1, g2.weight(8,10) )
+	this.assert_equal( 3, g2.weight(2,3) )
+	this.assert_equal( 4, g2.weight(3,5) )
+	this.assert_equal( 7, g2.weight(4,7) )
+	this.assert_equal( 8, g2.weight(4,5) )
+	this.assert_equal( 4, g2.weight(8,7) )
+	this.assert_equal( undefined, g2.weight(6,7) )
+	this.assert_equal( undefined, g2.weight(6,3) )
+	this.assert_equal( undefined, g2.weight(7,10) )
+
+}
+
 EasyGraph.Test.run = function(){
 
 	this.test_incrementor = 1;

@@ -7,7 +7,8 @@ EasyGraph = {
 	Graph:null,
 	GraphInspector: {
 		bfs : null,
-		priorityQueue : null, 
+		priorityQueueD : null, 
+		priorityQueueP : null, 
 		dfs : null,
 		topological : null
 	},	
@@ -17,7 +18,8 @@ EasyGraph = {
 		Dijkstra: null,
 		TopologicalSort: null, //Directed Acyclic Graph
         SPFA: null,
-        EulerPath: null
+        EulerPath: null,
+        TSP: null
 	}
 }
 
@@ -136,7 +138,8 @@ EasyGraph.GraphInspector.bfs = function( graph, rootVertex, f, visitedVertices )
 	}
 };
 
-EasyGraph.GraphInspector.priorityQueue = function( graph, rootVertex, f, visitedVertices ){
+// Dijkstra
+EasyGraph.GraphInspector.priorityQueueD = function( graph, rootVertex, f, visitedVertices ){
 	var visitedVertices = visitedVertices || {};
 	var costs = {};
 	var previous = {};
@@ -164,6 +167,41 @@ EasyGraph.GraphInspector.priorityQueue = function( graph, rootVertex, f, visited
 					if(!costs.hasOwnProperty(v) || iterationVertexCost + node[v] < costs[v]){
 						previous[v] = iterationVertex;
 						costs[v] = node[v] + iterationVertexCost;
+					}
+				}
+		else{ break; }
+	}
+}
+
+// Prim
+EasyGraph.GraphInspector.priorityQueueP = function( graph, rootVertex, f, visitedVertices ){
+	var visitedVertices = visitedVertices || {};
+	var costs = {};
+	var previous = {};
+	costs[rootVertex] = 0;
+
+	while (true){
+		var iterationVertexCost = Infinity;
+		var iterationVertex = null
+		for(var v in costs){
+			if(!visitedVertices.hasOwnProperty(v) && iterationVertexCost > costs[v] ){
+				iterationVertex = v;
+				iterationVertexCost = costs[v];
+			}
+		}
+
+		if(iterationVertex == null)
+			break
+
+		var node = graph.node(iterationVertex);
+		visitedVertices[iterationVertex] = true;
+
+		if(f.call( graph, visitedVertices, previous, iterationVertex, iterationVertexCost, node)){
+			for(var v in node)
+				if(!visitedVertices.hasOwnProperty(v))
+					if(!costs.hasOwnProperty(v) || node[v] < costs[v]){
+						previous[v] = iterationVertex;
+						costs[v] = node[v];
 					}
 				}
 		else{ break; }
@@ -526,7 +564,7 @@ EasyGraph.Algorithms.Dijkstra.prototype.distance = function( from, to ){
 		  cost = iterationVertexCost;
 
 		return iterationVertex != toS;
-	}, "priorityQueue");
+	}, "priorityQueueD");
 
 	return cost;
 }
@@ -538,7 +576,7 @@ EasyGraph.Algorithms.Dijkstra.prototype.distances = function( from ){
 		costs[iterationVertex] = iterationVertexCost
 
 		return true;
-	}, "priorityQueue");
+	}, "priorityQueueD");
 
 	return costs;
 }
@@ -555,7 +593,7 @@ EasyGraph.Algorithms.Dijkstra.prototype.path = function( fromV, toV ){
 		prev = previous;
 
 		return iterationVertex != to;
-	}, "priorityQueue");
+	}, "priorityQueueD");
 
 	if (prev[to] === undefined)
 		return [];
@@ -822,5 +860,73 @@ EasyGraph.Algorithms.EulerPath.prototype.startPoints = function(){
 		start : start,
 		finish : finish
 	}
+}
 
-} 
+// Minimum spanning tree
+EasyGraph.Algorithms.MSP = function( graph ){
+	this.graph = graph;
+}
+
+EasyGraph.Algorithms.MSP.prototype.run = function(){
+
+	var g2 = new EasyGraph.Graph;
+	var self = this;
+	g2.directed = this.graph.directed;
+
+	this.graph.visit( this.graph.vertices[0], 
+		function(visitedVertices, previous, iterationVertex, iterationVertexCost, node){
+			if ( previous[iterationVertex] !== undefined )
+				g2.connect(previous[iterationVertex], iterationVertex, self.graph.weight(previous[iterationVertex], iterationVertex) )
+			
+			return true;
+		},
+		"priorityQueueP"
+	);
+
+	return g2;
+}
+
+EasyGraph.Algorithms.TSP = function( graph ){
+	this.graph = graph;
+}
+
+EasyGraph.Algorithms.TSP.prototype.distance = function( requestedVertices ){
+	var left = {};
+	var cost = 0;
+	var path = [];
+
+	var currentVertex = String(this.graph.vertices[0]);
+
+	for( var v in requestedVertices)
+		left[v] = true;
+
+	var nextVertex = undefined;
+	while( nextVertex !== null ){
+
+ 		nextVertex = null;
+
+		this.graph.visit( currentVertex, function(visitedVertices, previous, iterationVertex, iterationVertexCost, node){
+			if ( iterationVertex == currentVertex )
+				return true;
+			else{ 
+				if (left[iterationVertex] === undefined)
+						return true;
+				else{
+					nextVertex = iterationVertex;			
+					return false;
+				}	
+			}
+		}, "priorityQueueD");
+
+		if( nextVertex != null)
+			cost += this.graph.distance(currentVertex, nextVertex);
+
+		delete left[currentVertex];
+		path.push(nextVertex);
+		currentVertex = nextVertex;
+	}
+
+	return cost;
+}
+
+
