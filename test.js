@@ -342,7 +342,38 @@ EasyGraph.Test.test_spanning_tree = function(){
 	this.assert_equal( undefined, g2.weight(6,7) )
 	this.assert_equal( undefined, g2.weight(6,3) )
 	this.assert_equal( undefined, g2.weight(7,10) )
+}
 
+EasyGraph.Test.test_tsp = function(){
+	var g = new EasyGraph.Graph
+	g.import([
+		[1,2,9],
+		[1,3,9],
+		[1,4,8],
+		[1,9,18],
+		[2,3,3],
+		[2,6,6],
+		[3,4,9],
+		[3,5,4],
+		[3,6,4],
+		[4,5,8],
+		[4,7,7],
+		[4,10,9],
+		[4,9,10],
+		[5,6,2],
+		[5,7,9],
+		[6,7,9],
+		[7,8,4],
+		[7,10,5],
+		[8,10,1],
+		[8,9,4],
+		[9,10,3]]);
+
+	a = new EasyGraph.Algorithms.TSP(g);
+
+	this.assert_equal( 16, a.distance([1,4]) );
+	this.assert_equal( 21, a.distance([1,2,3]) );
+	this.assert_equal( 58, a.distance(g.vertices) );
 }
 
 EasyGraph.Test.run = function(){

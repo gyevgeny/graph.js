@@ -13,13 +13,8 @@ EasyGraph.problems.rbx711 = function( input ){
 	var g = new EasyGraph.Graph();
 	g.import( input );
 
-	var requestedVertices = {};
-	for(var i = 0 ; i <  g.vertices.length ; i++){
-		requestedVertices[ g.vertices[i] ] = true;
-	}
-
 	a = new EasyGraph.Algorithms.TSP( g );
-	return a.distance( requestedVertices );
+	return a.distance( g.vertices );
 }
 
 EasyGraph.problems.rbx711.test = {

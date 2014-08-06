@@ -19,6 +19,7 @@ EasyGraph = {
 		TopologicalSort: null, //Directed Acyclic Graph
         SPFA: null,
         EulerPath: null,
+        MSP: null,
         TSP: null
 	}
 }
@@ -890,43 +891,35 @@ EasyGraph.Algorithms.TSP = function( graph ){
 	this.graph = graph;
 }
 
-EasyGraph.Algorithms.TSP.prototype.distance = function( requestedVertices ){
-	var left = {};
-	var cost = 0;
-	var path = [];
+// 564 | 6692
+// 3115 | 124386
+// requestedVertices is an array.
+EasyGraph.Algorithms.TSP.prototype.distance = function( vs ){
+	var a = new EasyGraph.Algorithms.MSP( this.graph )
+	var minSpanning = a.run();
 
-	var currentVertex = String(this.graph.vertices[0]);
+	var self = this;
 
-	for( var v in requestedVertices)
-		left[v] = true;
+	var lastVertex = String(vs[0]);
+	var start = String(vs[0]);
 
-	var nextVertex = undefined;
-	while( nextVertex !== null ){
+	var requestedVertices = {};
+	for( i in vs )
+		requestedVertices[ String(vs[i]) ] = true;
 
- 		nextVertex = null;
+	var distance = 0;
+	minSpanning.visit( start, function(vv, iterationVertex, node){
+		if (requestedVertices.hasOwnProperty(iterationVertex) && lastVertex != iterationVertex){
+			distance += self.graph.distance( lastVertex, iterationVertex );
+			lastVertex = iterationVertex;
+		}
 
-		this.graph.visit( currentVertex, function(visitedVertices, previous, iterationVertex, iterationVertexCost, node){
-			if ( iterationVertex == currentVertex )
-				return true;
-			else{ 
-				if (left[iterationVertex] === undefined)
-						return true;
-				else{
-					nextVertex = iterationVertex;			
-					return false;
-				}	
-			}
-		}, "priorityQueueD");
+		return true;
+	}, "dfs");
 
-		if( nextVertex != null)
-			cost += this.graph.distance(currentVertex, nextVertex);
+	distance += this.graph.distance(lastVertex, start);
 
-		delete left[currentVertex];
-		path.push(nextVertex);
-		currentVertex = nextVertex;
-	}
-
-	return cost;
+	return distance;
 }
 
 
