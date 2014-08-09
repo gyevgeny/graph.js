@@ -891,8 +891,6 @@ EasyGraph.Algorithms.TSP = function( graph ){
 	this.graph = graph;
 }
 
-// 564 | 6692
-// 3115 | 124386
 // requestedVertices is an array.
 EasyGraph.Algorithms.TSP.prototype.distance = function( vs ){
 	var a = new EasyGraph.Algorithms.MSP( this.graph )
@@ -922,4 +920,30 @@ EasyGraph.Algorithms.TSP.prototype.distance = function( vs ){
 	return distance;
 }
 
+EasyGraph.Algorithms.TSP.prototype.path = function( vs ){
+	var a = new EasyGraph.Algorithms.MSP( this.graph )
+	var minSpanning = a.run();
 
+	var self = this;
+
+	var lastVertex = String(vs[0]);
+	var start = String(vs[0]);
+
+	var requestedVertices = {};
+	for( i in vs )
+		requestedVertices[ String(vs[i]) ] = true;
+
+	var path = [start];
+	minSpanning.visit( start, function(vv, iterationVertex, node){
+		if (requestedVertices.hasOwnProperty(iterationVertex) && lastVertex != iterationVertex){
+			path = path.concat( self.graph.path( lastVertex, iterationVertex ).splice(1) );
+			lastVertex = iterationVertex;
+		}
+
+		return true;
+	}, "dfs");
+
+	path = path.concat(this.graph.path(lastVertex, start).splice(1));
+
+	return path;
+}

@@ -8,16 +8,50 @@ Test2:
 */
 
 EasyGraph.problems = {};
-EasyGraph.problems.rbx711 = function( input ){
+EasyGraph.problems.tsp_uwaterloo = function( input ){
+
+	var canvas = document.createElement('canvas');
+	canvas.width  = 800;
+	canvas.height = 800;
+
+	var context = canvas.getContext("2d");
 
 	var g = new EasyGraph.Graph();
-	g.import( input );
+	for( var i = 0 ; i < input.length ; i++){
+
+		context.beginPath();
+		context.arc(5+input[i][1]*4,5+input[i][2]*4,3,0,2*Math.PI);
+		context.fillStyle = "#6c0";
+		context.fill();
+
+		for( var j = i+1 ; j < input.length ; j++ ){
+			var xx = input[i][1] - input[j][1];
+			var yy = input[i][2] - input[j][2];
+
+			var l = Math.sqrt(xx*xx+yy*yy)
+			g.connect( input[i][0], input[j][0], l)
+		}
+	}
 
 	a = new EasyGraph.Algorithms.TSP( g );
+
+	var path = a.path(g.vertices);
+	console.log(path);
+	for( i = 1 ; i < path.length ; i++){
+		var xy1 = Number(path[i-1])-1
+		var xy2 = Number(path[i])-1
+
+		context.beginPath();
+    	context.moveTo(5+input[xy1][1]*4, 5+input[xy1][2]*4);
+    	context.lineTo(5+input[xy2][1]*4, 5+input[xy2][2]*4);
+    	context.stroke();
+	}
+
+	document.getElementsByTagName('body')[0].appendChild(canvas);	
 	return a.distance( g.vertices );
 }
 
-EasyGraph.problems.rbx711.test = {
+EasyGraph.problems.tsp_uwaterloo.test = {
 	test2 : {
 		input : [[1, 0, 13],
 [2, 0, 26],
@@ -152,6 +186,7 @@ EasyGraph.problems.rbx711.test = {
 [131, 107, 27]],
 	output : ["564"]
 	},
+
 	test1: {
 		input : [[1, 2, 108],
 [2, 2, 111],
@@ -868,6 +903,5 @@ EasyGraph.problems.rbx711.test = {
 			"3115"
 		]
 	},
-
 }
 
